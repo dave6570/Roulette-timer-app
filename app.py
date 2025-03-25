@@ -26,30 +26,35 @@ if st.button("🎯 Start Round (Both Timers)"):
     st.session_state.wheel_timer_running = True
     st.session_state.ball_drop_time = None
 
-st.markdown("### Live Timers (from round start)")
-cols = st.columns(2)
+st.markdown("### Live Timers")
 
+# Compute elapsed time for ball
 if st.session_state.ball_start_time:
-    elapsed_ball = time.time() - st.session_state.ball_start_time
-    cols[0].metric("Ball Timer", f"{elapsed_ball:.2f} sec")
+    if st.session_state.ball_timer_running:
+        elapsed_ball = time.time() - st.session_state.ball_start_time
+    else:
+        elapsed_ball = st.session_state.ball_drop_time
+    st.metric("🟠 Ball Timer", f"{elapsed_ball:.2f} sec")
 else:
-    cols[0].metric("Ball Timer", "---")
+    st.metric("🟠 Ball Timer", "---")
 
+# Compute elapsed time for wheel
 if st.session_state.wheel_start_time:
     elapsed_wheel = time.time() - st.session_state.wheel_start_time
-    cols[1].metric("Wheel Timer", f"{elapsed_wheel:.2f} sec")
+    st.metric("🔵 Wheel Timer", f"{elapsed_wheel:.2f} sec")
 else:
-    cols[1].metric("Wheel Timer", "---")
+    st.metric("🔵 Wheel Timer", "---")
 
-# Ball Rotation Button
-if st.session_state.ball_timer_running:
-    if st.button("➕ Ball Rotation"):
-        st.session_state.ball_count += 1
-
-# Wheel Rotation Button
-if st.session_state.wheel_timer_running:
-    if st.button("➕ Wheel Rotation"):
-        st.session_state.wheel_count += 1
+# Rotation buttons
+col1, col2 = st.columns(2)
+with col1:
+    if st.session_state.ball_timer_running:
+        if st.button("➕ Ball Rotation"):
+            st.session_state.ball_count += 1
+with col2:
+    if st.session_state.wheel_timer_running:
+        if st.button("➕ Wheel Rotation"):
+            st.session_state.wheel_count += 1
 
 # Stop Ball Timer (marks drop)
 if st.session_state.ball_timer_running:
@@ -63,9 +68,7 @@ ball_rps = None
 wheel_rps = None
 
 if st.session_state.ball_start_time and st.session_state.ball_count > 0:
-    elapsed = time.time() - st.session_state.ball_start_time
-    if not st.session_state.ball_timer_running:
-        elapsed = st.session_state.ball_drop_time
+    elapsed = st.session_state.ball_drop_time if not st.session_state.ball_timer_running else time.time() - st.session_state.ball_start_time
     ball_rps = st.session_state.ball_count / elapsed
     st.markdown(f"**Ball Speed:** {ball_rps:.2f} RPS")
 
